@@ -1,0 +1,45 @@
+.profile-page {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding-bottom: 40px;
+}
+
+@media (min-width: 992px) {
+    .profile-page {
+        grid-template-columns: 1fr 300px;
+    }
+}
+
+.profile-main {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.section-card {
+    padding: 24px;
+}
+
+.section-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+aside .card {
+    padding: 16px;
+}
+
+aside h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+}
