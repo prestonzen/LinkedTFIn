@@ -13,6 +13,6 @@
         ]
     },
     "include": [
-        "functions/**/*.ts"
+        "**/*.ts"
     ]
 }

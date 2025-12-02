@@ -1,10 +1,21 @@
 import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { Home, Briefcase, MessageSquare, Bell, User, Search } from 'lucide-react';
 import './Layout.css';
+import { useAuth } from '../context/AuthContext';
 
 const Layout: React.FC = () => {
   const [isMeDropdownOpen, setIsMeDropdownOpen] = React.useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsMeDropdownOpen(false);
+    logout();
+    navigate('/');
+  };
+
   return (
     <div className="app-layout">
       <header className="navbar">
@@ -24,14 +35,14 @@ const Layout: React.FC = () => {
               <Home size={24} />
               <span>Home</span>
             </Link>
-            <Link to="/jobs" className="nav-item">
+            <a href="https://kaizen-university.com/lms/job-openings" className="nav-item" target="_blank" rel="noopener noreferrer">
               <Briefcase size={24} />
               <span>Jobs</span>
-            </Link>
-            <Link to="/messaging" className="nav-item">
+            </a>
+            <a href="https://discord.gg/Rtm4d3GPdn" className="nav-item" target="_blank" rel="noopener noreferrer">
               <MessageSquare size={24} />
               <span>Messaging</span>
-            </Link>
+            </a>
             <Link to="/notifications" className="nav-item">
               <Bell size={24} />
               <span>Notifications</span>
@@ -70,11 +81,7 @@ const Layout: React.FC = () => {
                       <a href="#">Job Posting Account</a>
                     </div>
                     <div className="dropdown-section">
-                      <Link to="/" onClick={() => {
-                        setIsMeDropdownOpen(false);
-                        // In a real app, we would clear auth tokens here
-                        window.location.href = '/';
-                      }}>Sign Out</Link>
+                      <a href="/" onClick={handleLogout}>Sign Out</a>
                     </div>
                   </div>
                 </div>

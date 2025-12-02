@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ProfileSection from './ProfileSection';
 import Modal from '../Modal';
+import { fileToBase64 } from '../../utils/imageUtils';
 
 interface Experience {
     id: string;
@@ -55,7 +56,8 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
         startDate: '',
         endDate: '',
         location: '',
-        description: ''
+        description: '',
+        logoUrl: ''
     });
 
     const handleAdd = () => {
@@ -67,7 +69,8 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
             startDate: '',
             endDate: '',
             location: '',
-            description: ''
+            description: '',
+            logoUrl: ''
         });
         setIsModalOpen(true);
     };
@@ -93,11 +96,15 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
         fileInputRef.current?.click();
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            setFormData({ ...formData, logoUrl: url });
+            try {
+                const base64 = await fileToBase64(file);
+                setFormData({ ...formData, logoUrl: base64 });
+            } catch (error) {
+                console.error("Error converting file to base64", error);
+            }
         }
     };
 

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Modal from '../Modal';
 import './ProfileHeader.css';
 
+import { fileToBase64 } from '../../utils/imageUtils';
+
 interface ProfileHeaderProps {
     isOwnProfile?: boolean;
 }
@@ -45,14 +47,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
         photoInputRef.current?.click();
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'photo') => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'photo') => {
         const file = event.target.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            if (type === 'banner') {
-                setBannerUrl(url);
-            } else {
-                setPhotoUrl(url);
+            try {
+                const base64 = await fileToBase64(file);
+                if (type === 'banner') {
+                    setBannerUrl(base64);
+                } else {
+                    setPhotoUrl(base64);
+                }
+            } catch (error) {
+                console.error("Error converting file to base64", error);
             }
         }
     };
@@ -144,11 +150,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
                             </a>
                         </div>
 
-                        <div className="profile-buttons">
-                            <button className="btn btn-primary">Open to</button>
-                            <button className="btn btn-outline">Add profile section</button>
-                            <button className="btn btn-outline">More</button>
-                        </div>
+                        {isOwnProfile && (
+                            <div className="profile-buttons">
+                                <button className="btn btn-primary" onClick={() => window.open('https://www.linkedin.com', '_blank')}>Open to</button>
+                                <button className="btn btn-outline" onClick={() => window.open('https://www.linkedin.com', '_blank')}>Add profile section</button>
+                                <button className="btn btn-outline" onClick={() => window.open('https://www.linkedin.com', '_blank')}>More</button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
