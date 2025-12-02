@@ -19,33 +19,39 @@ interface SectionProps {
 }
 
 const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
-    const [experiences, setExperiences] = useState<Experience[]>(() => {
-        const saved = localStorage.getItem('experiences');
-        return saved ? JSON.parse(saved) : [
-            {
-                id: '1',
-                title: 'Senior Software Engineer',
-                company: 'Company Name',
-                startDate: 'Jan 2023',
-                endDate: 'Present',
-                location: 'San Francisco, California, United States',
-                description: 'Leading the frontend development team...'
-            },
-            {
-                id: '2',
-                title: 'Software Engineer',
-                company: 'Startup Inc.',
-                startDate: 'Jun 2020',
-                endDate: 'Dec 2022',
-                location: 'Remote',
-                description: ''
+    const [experiences, setExperiences] = useState<Experience[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchExperiences = async () => {
+        try {
+            const response = await fetch('/api/experiences');
+            if (response.ok) {
+                const data = await response.json();
+                // Map API response to frontend model if needed (e.g. snake_case to camelCase)
+                // Our API returns snake_case for DB columns but we used camelCase in frontend.
+                // Let's adjust the API or the frontend. Adjusting frontend mapping here.
+                const mapped = data.map((item: any) => ({
+                    id: item.id,
+                    title: item.title,
+                    company: item.company,
+                    startDate: item.start_date,
+                    endDate: item.end_date,
+                    location: item.location,
+                    description: item.description,
+                    logoUrl: '' // Images still problematic without R2, skipping for now or using placeholder
+                }));
+                setExperiences(mapped);
             }
-        ];
-    });
+        } catch (error) {
+            console.error("Failed to fetch experiences", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     React.useEffect(() => {
-        localStorage.setItem('experiences', JSON.stringify(experiences));
-    }, [experiences]);
+        fetchExperiences();
+    }, []);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -81,13 +87,27 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
         setIsModalOpen(true);
     };
 
-    const handleSave = () => {
-        if (editingId) {
-            setExperiences(experiences.map(e => e.id === editingId ? { ...formData, id: editingId } : e));
-        } else {
-            setExperiences([...experiences, { ...formData, id: Date.now().toString() }]);
+    const handleSave = async () => {
+        try {
+            if (editingId) {
+                await fetch(`/api/experiences/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            } else {
+                await fetch('/api/experiences', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            }
+            fetchExperiences(); // Refresh list
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Failed to save experience", error);
+            alert("Failed to save");
         }
-        setIsModalOpen(false);
     };
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);

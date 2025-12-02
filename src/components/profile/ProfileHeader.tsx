@@ -12,60 +12,58 @@ interface ProfileHeaderProps {
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [profileData, setProfileData] = useState(() => {
-        const saved = localStorage.getItem('profileData');
-        return saved ? JSON.parse(saved) : {
-            name: 'Preston Zen',
-            headline: 'Software Engineer | Full Stack Developer | Building Cool Things',
-            location: 'San Francisco Bay Area'
-        };
+    const [profileData, setProfileData] = useState({
+        name: '',
+        headline: '',
+        location: '',
+        about: ''
     });
 
-    const [bannerUrl, setBannerUrl] = useState<string>(() => localStorage.getItem('bannerUrl') || '');
-    const [photoUrl, setPhotoUrl] = useState<string>(() => localStorage.getItem('photoUrl') || '');
+    const [bannerUrl, setBannerUrl] = useState<string>('');
+    const [photoUrl, setPhotoUrl] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(true);
 
     React.useEffect(() => {
-        localStorage.setItem('profileData', JSON.stringify(profileData));
-    }, [profileData]);
-
-    React.useEffect(() => {
-        if (bannerUrl) localStorage.setItem('bannerUrl', bannerUrl);
-    }, [bannerUrl]);
-
-    React.useEffect(() => {
-        if (photoUrl) localStorage.setItem('photoUrl', photoUrl);
-    }, [photoUrl]);
-
-    const bannerInputRef = React.useRef<HTMLInputElement>(null);
-    const photoInputRef = React.useRef<HTMLInputElement>(null);
-
-    const handleBannerClick = () => {
-        bannerInputRef.current?.click();
-    };
-
-    const handlePhotoClick = () => {
-        photoInputRef.current?.click();
-    };
-
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'photo') => {
-        const file = event.target.files?.[0];
-        if (file) {
+        const fetchProfile = async () => {
             try {
-                const base64 = await fileToBase64(file);
-                if (type === 'banner') {
-                    setBannerUrl(base64);
-                } else {
-                    setPhotoUrl(base64);
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    setProfileData({
+                        name: data.name || 'Preston Zen',
+                        headline: data.headline || 'Software Engineer',
+                        location: data.location || 'San Francisco Bay Area',
+                        about: data.about || ''
+                    });
+                    // Note: In a real app, images would be URLs from R2. 
+                    // For now, we might still rely on localStorage for heavy images or need a separate upload endpoint.
+                    // But let's assume we fetch them if they were part of the profile data (which they are in schema).
+                    // However, our current schema stores them as text, which is fine for base64 for small images, but bad for large.
+                    // We will keep using localStorage for images TEMPORARILY to avoid hitting D1 limits with huge base64 strings until R2 is set up.
+                    setBannerUrl(localStorage.getItem('bannerUrl') || '');
+                    setPhotoUrl(localStorage.getItem('photoUrl') || '');
                 }
             } catch (error) {
-                console.error("Error converting file to base64", error);
+                console.error("Failed to fetch profile", error);
+            } finally {
+                setIsLoading(false);
             }
-        }
-    };
+        };
+        fetchProfile();
+    }, []);
 
-    const handleSave = () => {
-        // TODO: Save to backend
-        setIsEditModalOpen(false);
+    const handleSave = async () => {
+        try {
+            await fetch('/api/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(profileData)
+            });
+            setIsEditModalOpen(false);
+        } catch (error) {
+            console.error("Failed to save profile", error);
+            alert("Failed to save changes");
+        }
     };
 
     return (
