@@ -1,9 +1,13 @@
 import React from 'react';
 import ProfileSection from './ProfileSection';
 
-const LicensesSection: React.FC = () => {
+interface SectionProps {
+    isOwnProfile?: boolean;
+}
+
+const LicensesSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
     return (
-        <ProfileSection title="Licenses & certifications" onAdd={() => { }} onEdit={() => { }}>
+        <ProfileSection title="Licenses & certifications" onAdd={() => { }} onEdit={() => { }} isOwnProfile={isOwnProfile}>
             <div className="list-item">
                 <div className="item-logo">L</div>
                 <div className="item-details">

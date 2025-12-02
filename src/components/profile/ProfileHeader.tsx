@@ -10,11 +10,52 @@ interface ProfileHeaderProps {
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [profileData, setProfileData] = useState({
-        name: 'Preston Zen',
-        headline: 'Software Engineer | Full Stack Developer | Building Cool Things',
-        location: 'San Francisco Bay Area'
+    const [profileData, setProfileData] = useState(() => {
+        const saved = localStorage.getItem('profileData');
+        return saved ? JSON.parse(saved) : {
+            name: 'Preston Zen',
+            headline: 'Software Engineer | Full Stack Developer | Building Cool Things',
+            location: 'San Francisco Bay Area'
+        };
     });
+
+    const [bannerUrl, setBannerUrl] = useState<string>(() => localStorage.getItem('bannerUrl') || '');
+    const [photoUrl, setPhotoUrl] = useState<string>(() => localStorage.getItem('photoUrl') || '');
+
+    React.useEffect(() => {
+        localStorage.setItem('profileData', JSON.stringify(profileData));
+    }, [profileData]);
+
+    React.useEffect(() => {
+        if (bannerUrl) localStorage.setItem('bannerUrl', bannerUrl);
+    }, [bannerUrl]);
+
+    React.useEffect(() => {
+        if (photoUrl) localStorage.setItem('photoUrl', photoUrl);
+    }, [photoUrl]);
+
+    const bannerInputRef = React.useRef<HTMLInputElement>(null);
+    const photoInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleBannerClick = () => {
+        bannerInputRef.current?.click();
+    };
+
+    const handlePhotoClick = () => {
+        photoInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'photo') => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            if (type === 'banner') {
+                setBannerUrl(url);
+            } else {
+                setPhotoUrl(url);
+            }
+        }
+    };
 
     const handleSave = () => {
         // TODO: Save to backend
@@ -24,24 +65,45 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
     return (
         <>
             <div className="card profile-header-card">
-                <div className="profile-banner">
+                <div className="profile-banner" style={{ backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined }}>
                     {isOwnProfile && (
-                        <button className="edit-banner-btn" aria-label="Edit background">
-                            <Camera size={16} />
-                        </button>
+                        <>
+                            <button className="edit-banner-btn" aria-label="Edit background" onClick={handleBannerClick}>
+                                <Camera size={16} />
+                            </button>
+                            <input
+                                type="file"
+                                ref={bannerInputRef}
+                                style={{ display: 'none' }}
+                                accept="image/*"
+                                onChange={(e) => handleFileChange(e, 'banner')}
+                            />
+                        </>
                     )}
                 </div>
 
                 <div className="profile-info-container">
                     <div className="profile-photo-wrapper">
                         <div className="profile-photo">
-                            {/* Placeholder for user image */}
-                            <span className="profile-initials">PZ</span>
+                            {photoUrl ? (
+                                <img src={photoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <span className="profile-initials">PZ</span>
+                            )}
                         </div>
                         {isOwnProfile && (
-                            <button className="edit-photo-btn" aria-label="Edit photo">
-                                <Camera size={18} />
-                            </button>
+                            <>
+                                <button className="edit-photo-btn" aria-label="Edit photo" onClick={handlePhotoClick}>
+                                    <Camera size={18} />
+                                </button>
+                                <input
+                                    type="file"
+                                    ref={photoInputRef}
+                                    style={{ display: 'none' }}
+                                    accept="image/*"
+                                    onChange={(e) => handleFileChange(e, 'photo')}
+                                />
+                            </>
                         )}
                     </div>
 

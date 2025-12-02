@@ -1,9 +1,13 @@
 import React from 'react';
 import ProfileSection from './ProfileSection';
 
-const PublicationsSection: React.FC = () => {
+interface SectionProps {
+    isOwnProfile?: boolean;
+}
+
+const PublicationsSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
     return (
-        <ProfileSection title="Publications" onAdd={() => { }} onEdit={() => { }}>
+        <ProfileSection title="Publications" onAdd={() => { }} onEdit={() => { }} isOwnProfile={isOwnProfile}>
             <div className="list-item">
                 <div className="item-details">
                     <h3 className="item-title">Modern Web Development with React</h3>

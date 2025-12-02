@@ -9,18 +9,22 @@ import SkillsSection from '../components/profile/SkillsSection';
 import PublicationsSection from '../components/profile/PublicationsSection';
 import '../styles/Profile.css';
 
-const Profile: React.FC = () => {
+interface ProfileProps {
+    isOwnProfile?: boolean;
+}
+
+const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true }) => {
     return (
         <div className="container profile-page">
             <div className="profile-main">
-                <ProfileHeader />
-                <AboutSection />
-                <ExperienceSection />
-                <EducationSection />
-                <LicensesSection />
-                <ProjectsSection />
-                <SkillsSection />
-                <PublicationsSection />
+                <ProfileHeader isOwnProfile={isOwnProfile} />
+                <AboutSection isOwnProfile={isOwnProfile} />
+                <ExperienceSection isOwnProfile={isOwnProfile} />
+                <EducationSection isOwnProfile={isOwnProfile} />
+                <LicensesSection isOwnProfile={isOwnProfile} />
+                <ProjectsSection isOwnProfile={isOwnProfile} />
+                <PublicationsSection isOwnProfile={isOwnProfile} />
+                <SkillsSection isOwnProfile={isOwnProfile} />
             </div>
 
             <aside className="profile-sidebar">

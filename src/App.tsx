@@ -4,6 +4,7 @@ import './index.css';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
+import PublicProfile from './pages/PublicProfile';
 
 import Profile from './pages/Profile';
 
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="in/:username" element={<PublicProfile />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

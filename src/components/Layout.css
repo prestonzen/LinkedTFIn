@@ -86,6 +86,9 @@
     cursor: pointer;
     position: relative;
     height: 100%;
+    background: none;
+    border: none;
+    padding: 0;
 }
 
 .nav-item:hover {
@@ -111,4 +114,101 @@
 .main-content {
     padding-top: 24px;
     min-height: calc(100vh - 52px);
+}
+
+/* Me Dropdown */
+.me-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 264px;
+    background: white;
+    border-radius: 8px 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--color-border);
+    z-index: 1000;
+    margin-top: 0px;
+}
+
+.me-dropdown-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.me-dropdown-user {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.me-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #666;
+    font-size: 20px;
+}
+
+.me-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.me-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--color-text-primary);
+}
+
+.me-headline {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.btn-block {
+    width: 100%;
+    display: block;
+    text-align: center;
+    margin-top: 8px;
+}
+
+.btn-sm {
+    padding: 4px 12px;
+    font-size: 14px;
+}
+
+.dropdown-section {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dropdown-section:last-child {
+    border-bottom: none;
+}
+
+.dropdown-section h3 {
+    padding: 4px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.dropdown-section a {
+    display: block;
+    padding: 4px 16px;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.dropdown-section a:hover {
+    text-decoration: underline;
+    background-color: var(--color-bg-secondary);
 }

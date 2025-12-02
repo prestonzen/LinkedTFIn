@@ -10,29 +10,41 @@ interface Experience {
     endDate: string;
     location: string;
     description: string;
+    logoUrl?: string;
 }
 
-const ExperienceSection: React.FC = () => {
-    const [experiences, setExperiences] = useState<Experience[]>([
-        {
-            id: '1',
-            title: 'Senior Software Engineer',
-            company: 'Company Name',
-            startDate: 'Jan 2023',
-            endDate: 'Present',
-            location: 'San Francisco, California, United States',
-            description: 'Leading the frontend development team...'
-        },
-        {
-            id: '2',
-            title: 'Software Engineer',
-            company: 'Startup Inc.',
-            startDate: 'Jun 2020',
-            endDate: 'Dec 2022',
-            location: 'Remote',
-            description: ''
-        }
-    ]);
+interface SectionProps {
+    isOwnProfile?: boolean;
+}
+
+const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
+    const [experiences, setExperiences] = useState<Experience[]>(() => {
+        const saved = localStorage.getItem('experiences');
+        return saved ? JSON.parse(saved) : [
+            {
+                id: '1',
+                title: 'Senior Software Engineer',
+                company: 'Company Name',
+                startDate: 'Jan 2023',
+                endDate: 'Present',
+                location: 'San Francisco, California, United States',
+                description: 'Leading the frontend development team...'
+            },
+            {
+                id: '2',
+                title: 'Software Engineer',
+                company: 'Startup Inc.',
+                startDate: 'Jun 2020',
+                endDate: 'Dec 2022',
+                location: 'Remote',
+                description: ''
+            }
+        ];
+    });
+
+    React.useEffect(() => {
+        localStorage.setItem('experiences', JSON.stringify(experiences));
+    }, [experiences]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -75,12 +87,28 @@ const ExperienceSection: React.FC = () => {
         setIsModalOpen(false);
     };
 
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleLogoClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setFormData({ ...formData, logoUrl: url });
+        }
+    };
+
     return (
         <>
-            <ProfileSection title="Experience" onAdd={handleAdd} onEdit={() => { }}>
+            <ProfileSection title="Experience" onAdd={handleAdd} onEdit={() => { }} isOwnProfile={isOwnProfile}>
                 {experiences.map(exp => (
-                    <div className="list-item" key={exp.id} onClick={() => handleEdit(exp)} style={{ cursor: 'pointer' }}>
-                        <div className="item-logo">{exp.company.charAt(0)}</div>
+                    <div className="list-item" key={exp.id} onClick={() => isOwnProfile && handleEdit(exp)} style={{ cursor: isOwnProfile ? 'pointer' : 'default' }}>
+                        <div className="item-logo">
+                            {exp.logoUrl ? <img src={exp.logoUrl} alt={exp.company} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : exp.company.charAt(0)}
+                        </div>
                         <div className="item-details">
                             <h3 className="item-title">{exp.title}</h3>
                             <p className="item-subtitle">{exp.company}</p>
@@ -97,6 +125,39 @@ const ExperienceSection: React.FC = () => {
                 title={editingId ? "Edit experience" : "Add experience"}
                 onSave={handleSave}
             >
+                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+                    <div
+                        style={{
+                            width: '48px',
+                            height: '48px',
+                            backgroundColor: '#f3f2ef',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            overflow: 'hidden'
+                        }}
+                        onClick={handleLogoClick}
+                    >
+                        {formData.logoUrl ? (
+                            <img src={formData.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            <span style={{ fontSize: '24px', color: '#666' }}>+</span>
+                        )}
+                    </div>
+                    <div>
+                        <p style={{ fontSize: '14px', fontWeight: '600' }}>Company Logo</p>
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Click to upload</p>
+                    </div>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                    />
+                </div>
+
                 <div className="form-group">
                     <label htmlFor="title" style={{ position: 'static', marginBottom: '4px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Title</label>
                     <input
