@@ -1,10 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pencil, Camera } from 'lucide-react';
-import { useState } from 'react';
 import Modal from '../Modal';
 import './ProfileHeader.css';
-
-import { fileToBase64 } from '../../utils/imageUtils';
 
 interface ProfileHeaderProps {
     isOwnProfile?: boolean;
@@ -21,7 +18,58 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
 
     const [bannerUrl, setBannerUrl] = useState<string>('');
     const [photoUrl, setPhotoUrl] = useState<string>('');
-    const [isLoading, setIsLoading] = useState(true);
+
+
+    const bannerInputRef = React.useRef<HTMLInputElement>(null);
+    const photoInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleBannerClick = () => {
+        bannerInputRef.current?.click();
+    };
+
+    const handlePhotoClick = () => {
+        photoInputRef.current?.click();
+    };
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'photo') => {
+        const file = event.target.files?.[0];
+        if (file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (type === 'banner') {
+                        setBannerUrl(data.url);
+                        // Also update profile data immediately
+                        await fetch('/api/profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ...profileData, banner_url: data.url })
+                        });
+                    } else {
+                        setPhotoUrl(data.url);
+                        // Also update profile data immediately
+                        await fetch('/api/profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ...profileData, photo_url: data.url })
+                        });
+                    }
+                } else {
+                    console.error("Upload failed");
+                }
+            } catch (error) {
+                console.error("Error uploading file", error);
+            }
+        }
+    };
 
     React.useEffect(() => {
         const fetchProfile = async () => {
@@ -35,18 +83,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
                         location: data.location || 'San Francisco Bay Area',
                         about: data.about || ''
                     });
-                    // Note: In a real app, images would be URLs from R2. 
-                    // For now, we might still rely on localStorage for heavy images or need a separate upload endpoint.
-                    // But let's assume we fetch them if they were part of the profile data (which they are in schema).
-                    // However, our current schema stores them as text, which is fine for base64 for small images, but bad for large.
-                    // We will keep using localStorage for images TEMPORARILY to avoid hitting D1 limits with huge base64 strings until R2 is set up.
-                    setBannerUrl(localStorage.getItem('bannerUrl') || '');
-                    setPhotoUrl(localStorage.getItem('photoUrl') || '');
+                    setBannerUrl(data.banner_url || '');
+                    setPhotoUrl(data.photo_url || '');
                 }
             } catch (error) {
                 console.error("Failed to fetch profile", error);
-            } finally {
-                setIsLoading(false);
             }
         };
         fetchProfile();

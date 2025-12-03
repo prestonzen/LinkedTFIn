@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProfileSection from './ProfileSection';
 import Modal from '../Modal';
 import { fileToBase64 } from '../../utils/imageUtils';
@@ -20,39 +20,6 @@ interface SectionProps {
 
 const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
     const [experiences, setExperiences] = useState<Experience[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    const fetchExperiences = async () => {
-        try {
-            const response = await fetch('/api/experiences');
-            if (response.ok) {
-                const data = await response.json();
-                // Map API response to frontend model if needed (e.g. snake_case to camelCase)
-                // Our API returns snake_case for DB columns but we used camelCase in frontend.
-                // Let's adjust the API or the frontend. Adjusting frontend mapping here.
-                const mapped = data.map((item: any) => ({
-                    id: item.id,
-                    title: item.title,
-                    company: item.company,
-                    startDate: item.start_date,
-                    endDate: item.end_date,
-                    location: item.location,
-                    description: item.description,
-                    logoUrl: '' // Images still problematic without R2, skipping for now or using placeholder
-                }));
-                setExperiences(mapped);
-            }
-        } catch (error) {
-            console.error("Failed to fetch experiences", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    React.useEffect(() => {
-        fetchExperiences();
-    }, []);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Experience>({
@@ -65,6 +32,32 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
         description: '',
         logoUrl: ''
     });
+
+    const fetchExperiences = async () => {
+        try {
+            const response = await fetch('/api/experiences');
+            if (response.ok) {
+                const data = await response.json();
+                const mapped = data.map((item: any) => ({
+                    id: item.id,
+                    title: item.title,
+                    company: item.company,
+                    startDate: item.start_date,
+                    endDate: item.end_date,
+                    location: item.location,
+                    description: item.description,
+                    logoUrl: ''
+                }));
+                setExperiences(mapped);
+            }
+        } catch (error) {
+            console.error("Failed to fetch experiences", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchExperiences();
+    }, []);
 
     const handleAdd = () => {
         setEditingId(null);
@@ -102,7 +95,7 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
                     body: JSON.stringify(formData)
                 });
             }
-            fetchExperiences(); // Refresh list
+            fetchExperiences();
             setIsModalOpen(false);
         } catch (error) {
             console.error("Failed to save experience", error);

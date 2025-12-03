@@ -15,8 +15,8 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<HomeWrapper />} />
+          <Route path="/" element={<HomeWrapper />} />
+          <Route element={<Layout />}>
             <Route path="profile" element={<Profile />} />
             <Route path="in/:username" element={<PublicProfile />} />
           </Route>
@@ -30,7 +30,13 @@ function App() {
 
 const HomeWrapper: React.FC = () => {
   const { isLoggedIn } = useAuth();
-  return isLoggedIn ? <Feed /> : <Home />;
+  return isLoggedIn ? (
+    <Layout>
+      <Feed />
+    </Layout>
+  ) : (
+    <Home />
+  );
 };
 
 export default App;

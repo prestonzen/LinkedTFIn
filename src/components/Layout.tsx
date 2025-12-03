@@ -4,9 +4,13 @@ import { Home, Briefcase, MessageSquare, Bell, User, Search } from 'lucide-react
 import './Layout.css';
 import { useAuth } from '../context/AuthContext';
 
-const Layout: React.FC = () => {
+interface LayoutProps {
+  children?: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMeDropdownOpen, setIsMeDropdownOpen] = React.useState(false);
-  const { logout } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = (e: React.MouseEvent) => {
@@ -47,52 +51,60 @@ const Layout: React.FC = () => {
               <Bell size={24} />
               <span>Notifications</span>
             </Link>
-            <div className="nav-item-wrapper" style={{ position: 'relative' }}>
-              <button
-                className="nav-item"
-                onClick={() => setIsMeDropdownOpen(!isMeDropdownOpen)}
-                onBlur={() => setTimeout(() => setIsMeDropdownOpen(false), 200)}
-              >
-                <User size={24} />
-                <span>Me</span>
-              </button>
-              {isMeDropdownOpen && (
-                <div className="me-dropdown">
-                  <div className="me-dropdown-header">
-                    <div className="me-dropdown-user">
-                      <div className="me-avatar">PZ</div>
-                      <div className="me-info">
-                        <div className="me-name">Preston Zen</div>
-                        <div className="me-headline">Software Engineer</div>
+
+            {isLoggedIn ? (
+              <div className="nav-item-wrapper" style={{ position: 'relative' }}>
+                <button
+                  className="nav-item"
+                  onClick={() => setIsMeDropdownOpen(!isMeDropdownOpen)}
+                  onBlur={() => setTimeout(() => setIsMeDropdownOpen(false), 200)}
+                >
+                  <User size={24} />
+                  <span>Me</span>
+                </button>
+                {isMeDropdownOpen && (
+                  <div className="me-dropdown">
+                    <div className="me-dropdown-header">
+                      <div className="me-dropdown-user">
+                        <div className="me-avatar">PZ</div>
+                        <div className="me-info">
+                          <div className="me-name">Preston Zen</div>
+                          <div className="me-headline">Software Engineer</div>
+                        </div>
+                      </div>
+                      <Link to="/profile" className="btn btn-outline btn-sm btn-block">View Profile</Link>
+                    </div>
+                    <div className="me-dropdown-items">
+                      <div className="dropdown-section">
+                        <h3>Account</h3>
+                        <a href="#">Settings & Privacy</a>
+                        <a href="#">Help</a>
+                        <a href="#">Language</a>
+                      </div>
+                      <div className="dropdown-section">
+                        <h3>Manage</h3>
+                        <a href="#">Posts & Activity</a>
+                        <a href="#">Job Posting Account</a>
+                      </div>
+                      <div className="dropdown-section">
+                        <a href="/" onClick={handleLogout}>Sign Out</a>
                       </div>
                     </div>
-                    <Link to="/profile" className="btn btn-outline btn-sm btn-block">View Profile</Link>
                   </div>
-                  <div className="me-dropdown-items">
-                    <div className="dropdown-section">
-                      <h3>Account</h3>
-                      <a href="#">Settings & Privacy</a>
-                      <a href="#">Help</a>
-                      <a href="#">Language</a>
-                    </div>
-                    <div className="dropdown-section">
-                      <h3>Manage</h3>
-                      <a href="#">Posts & Activity</a>
-                      <a href="#">Job Posting Account</a>
-                    </div>
-                    <div className="dropdown-section">
-                      <a href="/" onClick={handleLogout}>Sign Out</a>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              <div className="nav-auth-buttons" style={{ display: 'flex', gap: '12px', marginLeft: '12px' }}>
+                <Link to="/register" className="btn btn-ghost" style={{ fontWeight: '600' }}>Join now</Link>
+                <Link to="/login" className="btn btn-outline" style={{ padding: '6px 24px' }}>Sign in</Link>
+              </div>
+            )}
           </nav>
         </div>
       </header>
 
       <main className="main-content">
-        <Outlet />
+        {children || <Outlet />}
       </main>
     </div>
   );

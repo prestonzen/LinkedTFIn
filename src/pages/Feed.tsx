@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Image, Calendar, FileText, MoreHorizontal, ThumbsUp, MessageSquare, Share2, Send } from 'lucide-react';
+import { Image as ImageIcon, Calendar, FileText, MoreHorizontal, ThumbsUp, MessageSquare, Share2, Send } from 'lucide-react';
 import '../components/Layout.css'; // Reuse some styles
 
 const Feed: React.FC = () => {
@@ -58,7 +58,7 @@ const Feed: React.FC = () => {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 16px' }}>
                         <button className="btn btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#378fe9' }}>
-                            <Image size={20} /> <span>Media</span>
+                            <ImageIcon size={20} /> <span>Media</span>
                         </button>
                         <button className="btn btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#c37d16' }}>
                             <Calendar size={20} /> <span>Event</span>
