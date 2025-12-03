@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Pencil, Camera } from 'lucide-react';
 import Modal from '../Modal';
+import ImageCropper from '../ImageCropper';
 import './ProfileHeader.css';
 
 interface ProfileHeaderProps {
@@ -19,9 +20,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
     const [bannerUrl, setBannerUrl] = useState<string>('');
     const [photoUrl, setPhotoUrl] = useState<string>('');
 
+    // Cropping state
+    const [croppingImage, setCroppingImage] = useState<string | null>(null);
+    const [cropAspect, setCropAspect] = useState(1);
+    const [uploadType, setUploadType] = useState<'profile' | 'banner' | null>(null);
 
-    const bannerInputRef = React.useRef<HTMLInputElement>(null);
-    const photoInputRef = React.useRef<HTMLInputElement>(null);
+    const bannerInputRef = useRef<HTMLInputElement>(null);
+    const photoInputRef = useRef<HTMLInputElement>(null);
 
     const handleBannerClick = () => {
         bannerInputRef.current?.click();
@@ -31,47 +36,72 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
         photoInputRef.current?.click();
     };
 
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'photo') => {
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'banner') => {
         const file = event.target.files?.[0];
         if (file) {
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
+            const reader = new FileReader();
+            reader.onload = () => {
+                setCroppingImage(reader.result as string);
+                setCropAspect(type === 'profile' ? 1 : 4);
+                setUploadType(type);
+            };
+            reader.readAsDataURL(file);
+        }
+        // Reset input value to allow selecting same file again
+        event.target.value = '';
+    };
 
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        if (!uploadType) return;
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (type === 'banner') {
-                        setBannerUrl(data.url);
-                        // Also update profile data immediately
-                        await fetch('/api/profile', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ...profileData, banner_url: data.url })
-                        });
-                    } else {
-                        setPhotoUrl(data.url);
-                        // Also update profile data immediately
-                        await fetch('/api/profile', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ...profileData, photo_url: data.url })
-                        });
-                    }
+        const file = new File([croppedBlob], "cropped-image.jpg", { type: "image/jpeg" });
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (uploadType === 'profile') {
+                    setPhotoUrl(data.url);
+                    // Update profile immediately
+                    await fetch('/api/profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...profileData, photo_url: data.url })
+                    });
                 } else {
-                    console.error("Upload failed");
+                    setBannerUrl(data.url);
+                    // Update profile immediately
+                    await fetch('/api/profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...profileData, banner_url: data.url })
+                    });
                 }
-            } catch (error) {
-                console.error("Error uploading file", error);
+            } else {
+                console.error("Upload failed");
+                alert("Upload failed. Please try again.");
             }
+        } catch (error) {
+            console.error("Error uploading file", error);
+            alert(`Error uploading file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        } finally {
+            setCroppingImage(null);
+            setUploadType(null);
         }
     };
 
-    React.useEffect(() => {
+    const handleCancelCrop = () => {
+        setCroppingImage(null);
+        setUploadType(null);
+    };
+
+    useEffect(() => {
         const fetchProfile = async () => {
             try {
                 const response = await fetch('/api/profile');
@@ -109,6 +139,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
 
     return (
         <>
+            {croppingImage && (
+                <ImageCropper
+                    imageSrc={croppingImage}
+                    onCropComplete={handleCropComplete}
+                    onCancel={handleCancelCrop}
+                    aspect={cropAspect}
+                />
+            )}
             <div className="card profile-header-card">
                 <div className="profile-banner" style={{ backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined }}>
                     {isOwnProfile && (
@@ -146,7 +184,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
                                     ref={photoInputRef}
                                     style={{ display: 'none' }}
                                     accept="image/*"
-                                    onChange={(e) => handleFileChange(e, 'photo')}
+                                    onChange={(e) => handleFileChange(e, 'profile')}
                                 />
                             </>
                         )}

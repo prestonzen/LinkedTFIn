@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProfileSection from './ProfileSection';
 import Modal from '../Modal';
-
 import { fileToBase64 } from '../../utils/imageUtils';
 
 interface Education {
@@ -22,27 +21,35 @@ interface SectionProps {
 }
 
 const EducationSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
-    const [education, setEducation] = useState<Education[]>(() => {
-        const saved = localStorage.getItem('education');
-        return saved ? JSON.parse(saved) : [
-            {
-                id: '1',
-                school: 'University of California, Berkeley',
-                degree: 'Bachelor of Science - BS',
-                fieldOfStudy: 'Computer Science',
-                startDate: '2016',
-                endDate: '2020',
-                grade: '3.8 GPA',
-                activities: 'Computer Science Club, Hackathon Team',
-                description: 'Focused on distributed systems and artificial intelligence.',
-                logoUrl: ''
-            }
-        ];
-    });
+    const [education, setEducation] = useState<Education[]>([]);
 
-    React.useEffect(() => {
-        localStorage.setItem('education', JSON.stringify(education));
-    }, [education]);
+    const fetchEducation = async () => {
+        try {
+            const response = await fetch('/api/education');
+            if (response.ok) {
+                const data = await response.json();
+                const mapped = data.map((item: any) => ({
+                    id: item.id,
+                    school: item.school,
+                    degree: item.degree,
+                    fieldOfStudy: item.field_of_study,
+                    startDate: item.start_date,
+                    endDate: item.end_date,
+                    grade: '', // Not in DB schema yet
+                    activities: '', // Not in DB schema yet
+                    description: item.description,
+                    logoUrl: ''
+                }));
+                setEducation(mapped);
+            }
+        } catch (error) {
+            console.error("Failed to fetch education", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchEducation();
+    }, []);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -100,13 +107,27 @@ const EducationSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
         setIsModalOpen(true);
     };
 
-    const handleSave = () => {
-        if (editingId) {
-            setEducation(education.map(e => e.id === editingId ? { ...formData, id: editingId } : e));
-        } else {
-            setEducation([...education, { ...formData, id: Date.now().toString() }]);
+    const handleSave = async () => {
+        try {
+            if (editingId) {
+                await fetch(`/api/education/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            } else {
+                await fetch('/api/education', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            }
+            fetchEducation();
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Failed to save education", error);
+            alert("Failed to save");
         }
-        setIsModalOpen(false);
     };
 
     return (
@@ -199,7 +220,7 @@ const EducationSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
                 <div className="form-group">
                     <label htmlFor="startDate" style={{ position: 'static', marginBottom: '4px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Start Date</label>
                     <input
-                        type="text"
+                        type="date"
                         id="startDate"
                         value={formData.startDate}
                         onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
@@ -209,7 +230,7 @@ const EducationSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
                 <div className="form-group">
                     <label htmlFor="endDate" style={{ position: 'static', marginBottom: '4px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>End Date</label>
                     <input
-                        type="text"
+                        type="date"
                         id="endDate"
                         value={formData.endDate}
                         onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}

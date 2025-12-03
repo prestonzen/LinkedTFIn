@@ -201,7 +201,7 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
                 <div className="form-group">
                     <label htmlFor="startDate" style={{ position: 'static', marginBottom: '4px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Start Date</label>
                     <input
-                        type="text"
+                        type="date"
                         id="startDate"
                         value={formData.startDate}
                         onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
@@ -211,7 +211,7 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
                 <div className="form-group">
                     <label htmlFor="endDate" style={{ position: 'static', marginBottom: '4px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>End Date</label>
                     <input
-                        type="text"
+                        type="date"
                         id="endDate"
                         value={formData.endDate}
                         onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}

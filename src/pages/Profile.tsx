@@ -39,12 +39,12 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true }) => {
                             <h3>Public profile & URL</h3>
                             <p
                                 onClick={() => {
-                                    navigator.clipboard.writeText('www.linkedtfin.com/in/prestonzen');
+                                    navigator.clipboard.writeText('linkedtfin.com/in/prestonzen');
                                     alert('URL copied to clipboard!');
                                 }}
                                 style={{ cursor: 'pointer' }}
                             >
-                                www.linkedtfin.com/in/prestonzen
+                                linkedtfin.com/in/prestonzen
                             </p>
                         </div>
                     </div>

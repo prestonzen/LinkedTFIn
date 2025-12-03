@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ProfileSection from './ProfileSection';
+import Modal from '../Modal';
 
 interface Project {
     id: string;
@@ -119,55 +120,53 @@ const ProjectsSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
             ))}
 
             {isModalOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h2>{editingId ? 'Edit Project' : 'Add Project'}</h2>
-                        <div className="form-group">
-                            <label>Project Name</label>
-                            <input
-                                type="text"
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Start Date</label>
-                            <input
-                                type="text"
-                                value={formData.startDate}
-                                onChange={e => setFormData({ ...formData, startDate: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>End Date</label>
-                            <input
-                                type="text"
-                                value={formData.endDate}
-                                onChange={e => setFormData({ ...formData, endDate: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Project URL</label>
-                            <input
-                                type="text"
-                                value={formData.url}
-                                onChange={e => setFormData({ ...formData, url: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Description</label>
-                            <textarea
-                                value={formData.description}
-                                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                rows={4}
-                            />
-                        </div>
-                        <div className="modal-actions">
-                            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                            <button className="btn-primary" onClick={handleSave}>Save</button>
-                        </div>
+                <Modal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    title={editingId ? 'Edit Project' : 'Add Project'}
+                    onSave={handleSave}
+                >
+                    <div className="form-group">
+                        <label>Project Name</label>
+                        <input
+                            type="text"
+                            value={formData.name}
+                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        />
                     </div>
-                </div>
+                    <div className="form-group">
+                        <label>Start Date</label>
+                        <input
+                            type="date"
+                            value={formData.startDate}
+                            onChange={e => setFormData({ ...formData, startDate: e.target.value })}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>End Date</label>
+                        <input
+                            type="date"
+                            value={formData.endDate}
+                            onChange={e => setFormData({ ...formData, endDate: e.target.value })}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Project URL</label>
+                        <input
+                            type="text"
+                            value={formData.url}
+                            onChange={e => setFormData({ ...formData, url: e.target.value })}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Description</label>
+                        <textarea
+                            value={formData.description}
+                            onChange={e => setFormData({ ...formData, description: e.target.value })}
+                            rows={4}
+                        />
+                    </div>
+                </Modal>
             )}
         </ProfileSection>
     );

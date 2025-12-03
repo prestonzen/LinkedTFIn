@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import PublicProfile from './pages/PublicProfile';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './index.css';
 
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<HomeWrapper />} />
           <Route element={<Layout />}>
             <Route path="profile" element={<Profile />} />
+            <Route path="notifications" element={<Notifications />} />
             <Route path="in/:username" element={<PublicProfile />} />
           </Route>
           <Route path="/login" element={<Login />} />

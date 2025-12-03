@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ProfileSection from './ProfileSection';
+import Modal from '../Modal';
 
 interface Skill {
     id: string;
@@ -86,23 +87,23 @@ const SkillsSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
             ))}
 
             {isModalOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h2>Add Skill</h2>
-                        <div className="form-group">
-                            <label>Skill Name</label>
-                            <input
-                                type="text"
-                                value={newSkill}
-                                onChange={e => setNewSkill(e.target.value)}
-                            />
-                        </div>
-                        <div className="modal-actions">
-                            <button className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                            <button className="btn-primary" onClick={handleSave}>Save</button>
-                        </div>
+                <Modal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    title="Add Skill"
+                    onSave={handleSave}
+                >
+                    <div className="form-group">
+                        <label>Skill Name</label>
+                        <input
+                            type="text"
+                            value={newSkill}
+                            onChange={e => setNewSkill(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleSave()}
+                            placeholder="Ex: Project Management"
+                        />
                     </div>
-                </div>
+                </Modal>
             )}
         </ProfileSection>
     );

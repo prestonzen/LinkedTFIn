@@ -1,0 +1,10 @@
+
+ ⛅️ wrangler 4.51.0
+───────────────────
+✨ Compiled Worker successfully
+Uploading... (4/4)
+✨ Success! Uploaded 0 files (4 already uploaded) (0.29 sec)
+
+✨ Uploading Functions bundle
+🌎 Deploying...
+
