@@ -22,7 +22,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         return new Response(JSON.stringify(profile), {
             headers: { "Content-Type": "application/json" }
         });
-    } catch (e) {
+    } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), {
             status: 500,
             headers: { "Content-Type": "application/json" }
@@ -62,7 +62,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         return new Response(JSON.stringify({ success: true }), {
             headers: { "Content-Type": "application/json" }
         });
-    } catch (e) {
+    } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), {
             status: 500,
             headers: { "Content-Type": "application/json" }

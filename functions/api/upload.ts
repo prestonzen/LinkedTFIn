@@ -7,7 +7,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const formData = await context.request.formData();
         const file = formData.get('file');
 
-        if (!file || !(file instanceof File)) {
+        if (!file || typeof file === 'string') {
             return new Response('No file uploaded', { status: 400 });
         }
 

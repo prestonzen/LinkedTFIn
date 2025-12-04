@@ -7,14 +7,20 @@ DELETE FROM certifications WHERE user_id = 'prestonzen';
 DELETE FROM projects WHERE user_id = 'prestonzen';
 DELETE FROM publications WHERE user_id = 'prestonzen';
 
+-- Insert User first (to satisfy Foreign Key)
+INSERT OR IGNORE INTO users (id, email, password_hash, created_at, updated_at)
+VALUES ('prestonzen', 'preston@example.com', 'mock_hash', strftime('%s', 'now') * 1000, strftime('%s', 'now') * 1000);
+
 -- Insert Profile
-INSERT INTO profiles (user_id, name, headline, location, about, created_at, updated_at)
+INSERT INTO profiles (user_id, name, headline, location, about, photo_url, banner_url, created_at, updated_at)
 VALUES (
     'prestonzen',
     'Preston Zen',
     'Senior Full stack Engineer | Certified AWS Architect | Python | AI | ML | DJANGO | AZURE | GCP | React | Node.js | TypeScript | Go | PHP | OSCE3 | OSCP',
     'San Francisco Bay Area',
     'Software Development leader and AI Full Stack Engineer with experience building solutions in healthcare, finance, defense, and AI. Leads teams to architect scalable platforms and develop AI-driven applications for Fortune 500 companies. Experienced educator at top universities and contributor to global initiatives. Focused on solving complex challenges and turning ideas into impactful, scalable solutions. Let’s connect and create something great!',
+    '/api/assets/b4822a3e-f5b1-4e51-814b-5aa4af999eac-cropped-image.jpg',
+    '/api/assets/4164062d-8c42-46a8-8d56-ef652381355a-cropped-image.jpg',
     strftime('%s', 'now') * 1000,
     strftime('%s', 'now') * 1000
 );

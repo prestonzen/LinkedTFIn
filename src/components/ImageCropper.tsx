@@ -1,16 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import Cropper from 'react-easy-crop';
+import Cropper, { type Area } from 'react-easy-crop';
 import Modal from './Modal';
 import './ImageCropper.css';
 
 interface Point {
-    x: number;
-    y: number;
-}
-
-interface Area {
-    width: number;
-    height: number;
     x: number;
     y: number;
 }
@@ -35,7 +28,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
         setZoom(zoom);
     };
 
-    const onCropCompleteHandler = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+    const onCropCompleteHandler = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
         setCroppedAreaPixels(croppedAreaPixels);
     }, []);
 
