@@ -30,8 +30,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const now = Date.now();
 
         await context.env.DB.prepare(`
-            INSERT INTO experiences (id, user_id, title, company, location, start_date, end_date, description, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO experiences (id, user_id, title, company, location, start_date, end_date, description, logo_url, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
             id,
             userId,
@@ -41,6 +41,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             data.startDate,
             data.endDate,
             data.description,
+            data.logoUrl,
             now,
             now
         ).run();

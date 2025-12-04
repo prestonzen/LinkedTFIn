@@ -12,7 +12,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
         await context.env.DB.prepare(`
             UPDATE experiences 
-            SET title = ?, company = ?, location = ?, start_date = ?, end_date = ?, description = ?, updated_at = ?
+            SET title = ?, company = ?, location = ?, start_date = ?, end_date = ?, description = ?, logo_url = ?, updated_at = ?
             WHERE id = ? AND user_id = ?
         `).bind(
             data.title,
@@ -21,6 +21,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             data.startDate,
             data.endDate,
             data.description,
+            data.logoUrl,
             now,
             id,
             userId

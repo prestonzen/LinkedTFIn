@@ -218,7 +218,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
 
                         <div className="profile-secondary-info">
                             <p className="profile-location">{profileData.location}</p>
-                            <a href="#" className="contact-info-link">Contact info</a>
+                            <a href="https://portfolio.prestonzen.com" target="_blank" rel="noopener noreferrer" className="contact-info-link">Portfolio</a>
                         </div>
 
                         <div className="profile-connections">

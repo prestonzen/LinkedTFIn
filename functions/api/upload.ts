@@ -11,7 +11,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             return new Response('No file uploaded', { status: 400 });
         }
 
-        const key = `${crypto.randomUUID()}-${file.name}`;
+        const key = `${crypto.randomUUID()}-${(file as File).name}`;
         await context.env.BUCKET.put(key, file);
 
         return new Response(JSON.stringify({ key, url: `/api/assets/${key}` }), {

@@ -81,7 +81,7 @@ const SkillsSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
                                 </button>
                             )}
                         </div>
-                        <p className="item-meta">Endorsed by {skill.endorsements} colleagues</p>
+                        {/* <p className="item-meta">Endorsed by {skill.endorsements} colleagues</p> */}
                     </div>
                 </div>
             ))}

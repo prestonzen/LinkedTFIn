@@ -46,7 +46,7 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
                     endDate: item.end_date,
                     location: item.location,
                     description: item.description,
-                    logoUrl: ''
+                    logoUrl: item.logo_url || ''
                 }));
                 setExperiences(mapped);
             }
