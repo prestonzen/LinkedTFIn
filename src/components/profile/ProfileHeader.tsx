@@ -68,19 +68,19 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
                 const data = await response.json();
                 if (uploadType === 'profile') {
                     setPhotoUrl(data.url);
-                    // Update profile immediately
+                    // Update profile immediately, preserving existing banner_url
                     await fetch('/api/profile', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ...profileData, photo_url: data.url })
+                        body: JSON.stringify({ ...profileData, photo_url: data.url, banner_url: bannerUrl })
                     });
                 } else {
                     setBannerUrl(data.url);
-                    // Update profile immediately
+                    // Update profile immediately, preserving existing photo_url
                     await fetch('/api/profile', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ...profileData, banner_url: data.url })
+                        body: JSON.stringify({ ...profileData, banner_url: data.url, photo_url: photoUrl })
                     });
                 }
             } else {
@@ -128,7 +128,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isOwnProfile = true }) =>
             await fetch('/api/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(profileData)
+                body: JSON.stringify({ ...profileData, photo_url: photoUrl, banner_url: bannerUrl })
             });
             setIsEditModalOpen(false);
         } catch (error) {
