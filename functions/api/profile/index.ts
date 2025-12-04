@@ -22,7 +22,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         return new Response(JSON.stringify(profile), {
             headers: { "Content-Type": "application/json" }
         });
-    } catch (e) {
+    } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), {
             status: 500,
             headers: { "Content-Type": "application/json" }
@@ -38,13 +38,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         // Upsert profile
         await context.env.DB.prepare(`
-      INSERT INTO profiles (user_id, name, headline, location, about, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO profiles (user_id, name, headline, location, about, photo_url, banner_url, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(user_id) DO UPDATE SET
         name = excluded.name,
         headline = excluded.headline,
         location = excluded.location,
         about = excluded.about,
+        photo_url = excluded.photo_url,
+        banner_url = excluded.banner_url,
         updated_at = excluded.updated_at
     `).bind(
             userId,
@@ -52,13 +54,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             data.headline,
             data.location,
             data.about,
+            data.photo_url,
+            data.banner_url,
             Date.now()
         ).run();
 
         return new Response(JSON.stringify({ success: true }), {
             headers: { "Content-Type": "application/json" }
         });
-    } catch (e) {
+    } catch (e: any) {
         return new Response(JSON.stringify({ error: e.message }), {
             status: 500,
             headers: { "Content-Type": "application/json" }

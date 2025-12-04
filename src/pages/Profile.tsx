@@ -9,30 +9,47 @@ import SkillsSection from '../components/profile/SkillsSection';
 import PublicationsSection from '../components/profile/PublicationsSection';
 import '../styles/Profile.css';
 
-const Profile: React.FC = () => {
+interface ProfileProps {
+    isOwnProfile?: boolean;
+}
+
+const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true }) => {
     return (
         <div className="container profile-page">
-            <div className="profile-main">
-                <ProfileHeader />
-                <AboutSection />
-                <ExperienceSection />
-                <EducationSection />
-                <LicensesSection />
-                <ProjectsSection />
-                <SkillsSection />
-                <PublicationsSection />
+            <div className="profile-main" style={{ width: isOwnProfile ? 'auto' : '100%', maxWidth: isOwnProfile ? 'none' : '800px', margin: isOwnProfile ? '0' : '0 auto' }}>
+                <ProfileHeader isOwnProfile={isOwnProfile} />
+                <AboutSection isOwnProfile={isOwnProfile} />
+                <ExperienceSection isOwnProfile={isOwnProfile} />
+                <EducationSection isOwnProfile={isOwnProfile} />
+                <LicensesSection isOwnProfile={isOwnProfile} />
+                <ProjectsSection isOwnProfile={isOwnProfile} />
+                <PublicationsSection isOwnProfile={isOwnProfile} />
+                <SkillsSection isOwnProfile={isOwnProfile} />
             </div>
 
-            <aside className="profile-sidebar">
-                <div className="card">
-                    <h3>Profile language</h3>
-                    <p>English</p>
-                </div>
-                <div className="card">
-                    <h3>Public profile & URL</h3>
-                    <p>www.linkedtfin.com/in/prestonzen</p>
-                </div>
-            </aside>
+            {isOwnProfile && (
+                <aside className="profile-sidebar">
+                    <div className="card">
+                        <div className="sidebar-item">
+                            <h3>Profile language</h3>
+                            <p>English</p>
+                        </div>
+                        <div className="sidebar-divider"></div>
+                        <div className="sidebar-item">
+                            <h3>Public profile & URL</h3>
+                            <p
+                                onClick={() => {
+                                    navigator.clipboard.writeText('linkedtfin.com/in/prestonzen');
+                                    alert('URL copied to clipboard!');
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                linkedtfin.com/in/prestonzen
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+            )}
         </div>
     );
 };

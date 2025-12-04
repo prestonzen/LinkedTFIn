@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Auth.css';
 
+import { useAuth } from '../context/AuthContext';
+
 const Login: React.FC = () => {
+    const navigate = useNavigate();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Login attempt', { email, password });
-        // TODO: Implement actual login logic
+        login();
+        navigate('/profile');
     };
 
     return (

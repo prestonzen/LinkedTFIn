@@ -9,6 +9,9 @@
     padding: 16px 32px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .auth-logo {
@@ -154,6 +157,8 @@
 
 .auth-footer-text a:hover {
     text-decoration: underline;
+    background-color: rgba(10, 102, 194, 0.08);
+    border-radius: 4px;
 }
 
 .terms-text {

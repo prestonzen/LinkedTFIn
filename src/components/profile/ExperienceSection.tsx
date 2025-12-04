@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProfileSection from './ProfileSection';
 import Modal from '../Modal';
+import { fileToBase64 } from '../../utils/imageUtils';
 
 interface Experience {
     id: string;
@@ -10,30 +11,15 @@ interface Experience {
     endDate: string;
     location: string;
     description: string;
+    logoUrl?: string;
 }
 
-const ExperienceSection: React.FC = () => {
-    const [experiences, setExperiences] = useState<Experience[]>([
-        {
-            id: '1',
-            title: 'Senior Software Engineer',
-            company: 'Company Name',
-            startDate: 'Jan 2023',
-            endDate: 'Present',
-            location: 'San Francisco, California, United States',
-            description: 'Leading the frontend development team...'
-        },
-        {
-            id: '2',
-            title: 'Software Engineer',
-            company: 'Startup Inc.',
-            startDate: 'Jun 2020',
-            endDate: 'Dec 2022',
-            location: 'Remote',
-            description: ''
-        }
-    ]);
+interface SectionProps {
+    isOwnProfile?: boolean;
+}
 
+const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
+    const [experiences, setExperiences] = useState<Experience[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Experience>({
@@ -43,8 +29,35 @@ const ExperienceSection: React.FC = () => {
         startDate: '',
         endDate: '',
         location: '',
-        description: ''
+        description: '',
+        logoUrl: ''
     });
+
+    const fetchExperiences = async () => {
+        try {
+            const response = await fetch('/api/experiences');
+            if (response.ok) {
+                const data = await response.json();
+                const mapped = data.map((item: any) => ({
+                    id: item.id,
+                    title: item.title,
+                    company: item.company,
+                    startDate: item.start_date,
+                    endDate: item.end_date,
+                    location: item.location,
+                    description: item.description,
+                    logoUrl: item.logo_url || ''
+                }));
+                setExperiences(mapped);
+            }
+        } catch (error) {
+            console.error("Failed to fetch experiences", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchExperiences();
+    }, []);
 
     const handleAdd = () => {
         setEditingId(null);
@@ -55,7 +68,8 @@ const ExperienceSection: React.FC = () => {
             startDate: '',
             endDate: '',
             location: '',
-            description: ''
+            description: '',
+            logoUrl: ''
         });
         setIsModalOpen(true);
     };
@@ -66,21 +80,55 @@ const ExperienceSection: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleSave = () => {
-        if (editingId) {
-            setExperiences(experiences.map(e => e.id === editingId ? { ...formData, id: editingId } : e));
-        } else {
-            setExperiences([...experiences, { ...formData, id: Date.now().toString() }]);
+    const handleSave = async () => {
+        try {
+            if (editingId) {
+                await fetch(`/api/experiences/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            } else {
+                await fetch('/api/experiences', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            }
+            fetchExperiences();
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Failed to save experience", error);
+            alert("Failed to save");
         }
-        setIsModalOpen(false);
+    };
+
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleLogoClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            try {
+                const base64 = await fileToBase64(file);
+                setFormData({ ...formData, logoUrl: base64 });
+            } catch (error) {
+                console.error("Error converting file to base64", error);
+            }
+        }
     };
 
     return (
         <>
-            <ProfileSection title="Experience" onAdd={handleAdd} onEdit={() => { }}>
+            <ProfileSection title="Experience" onAdd={handleAdd} onEdit={() => { }} isOwnProfile={isOwnProfile}>
                 {experiences.map(exp => (
-                    <div className="list-item" key={exp.id} onClick={() => handleEdit(exp)} style={{ cursor: 'pointer' }}>
-                        <div className="item-logo">{exp.company.charAt(0)}</div>
+                    <div className="list-item" key={exp.id} onClick={() => isOwnProfile && handleEdit(exp)} style={{ cursor: isOwnProfile ? 'pointer' : 'default' }}>
+                        <div className="item-logo">
+                            {exp.logoUrl ? <img src={exp.logoUrl} alt={exp.company} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : exp.company.charAt(0)}
+                        </div>
                         <div className="item-details">
                             <h3 className="item-title">{exp.title}</h3>
                             <p className="item-subtitle">{exp.company}</p>
@@ -97,6 +145,39 @@ const ExperienceSection: React.FC = () => {
                 title={editingId ? "Edit experience" : "Add experience"}
                 onSave={handleSave}
             >
+                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+                    <div
+                        style={{
+                            width: '48px',
+                            height: '48px',
+                            backgroundColor: '#f3f2ef',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            overflow: 'hidden'
+                        }}
+                        onClick={handleLogoClick}
+                    >
+                        {formData.logoUrl ? (
+                            <img src={formData.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            <span style={{ fontSize: '24px', color: '#666' }}>+</span>
+                        )}
+                    </div>
+                    <div>
+                        <p style={{ fontSize: '14px', fontWeight: '600' }}>Company Logo</p>
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Click to upload</p>
+                    </div>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                    />
+                </div>
+
                 <div className="form-group">
                     <label htmlFor="title" style={{ position: 'static', marginBottom: '4px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Title</label>
                     <input
@@ -120,7 +201,7 @@ const ExperienceSection: React.FC = () => {
                 <div className="form-group">
                     <label htmlFor="startDate" style={{ position: 'static', marginBottom: '4px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>Start Date</label>
                     <input
-                        type="text"
+                        type="date"
                         id="startDate"
                         value={formData.startDate}
                         onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
@@ -130,7 +211,7 @@ const ExperienceSection: React.FC = () => {
                 <div className="form-group">
                     <label htmlFor="endDate" style={{ position: 'static', marginBottom: '4px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>End Date</label>
                     <input
-                        type="text"
+                        type="date"
                         id="endDate"
                         value={formData.endDate}
                         onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}

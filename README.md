@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# LinkedTFIn 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**A Professional LinkedIn Clone & Portfolio Showcase**
 
-Currently, two official plugins are available:
+[![Portfolio](https://img.shields.io/badge/Portfolio-PrestonZen-blue?style=for-the-badge&logo=google-chrome)](https://prestonzen.com)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)](https://linkedtfin.com)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📝 Disclaimer
 
-## React Compiler
+> [!IMPORTANT]
+> **This is a PARODY site.**
+>
+> This application was built from scratch by **Preston Zen** as a portfolio project. It is a demonstration of full-stack development capabilities using modern web technologies.
+>
+> **It is NOT affiliated with, endorsed by, or connected to LinkedIn Corporation in any way.**
+>
+> This project exists because my original LinkedIn account was restricted without clear explanation, preventing me from showcasing my professional network and portfolio. So, I built my own. 🤷‍♂️
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🌟 About The Project
 
-## Expanding the ESLint configuration
+LinkedTFIn is a fully functional social networking platform clone designed to mimic the core features of LinkedIn. It demonstrates proficiency in building complex, interactive web applications with a focus on performance, scalability, and user experience.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Key Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+*   **Authentication**: Secure user registration and login.
+*   **Profile Management**: Comprehensive profile editing (Experience, Education, Skills, etc.).
+*   **Network Feed**: Real-time post creation and feed updates.
+*   **Cloud Integration**:
+    *   **Database**: Cloudflare D1 (SQLite) for structured data.
+    *   **Storage**: Cloudflare R2 for image assets (Profile pictures, banners).
+    *   **Hosting**: Cloudflare Pages for global edge deployment.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🛠️ Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+*   **Frontend**: React, TypeScript, Vite
+*   **Styling**: Vanilla CSS (Custom Design System)
+*   **Backend/Edge**: Cloudflare Pages Functions
+*   **Database**: Cloudflare D1
+*   **Storage**: Cloudflare R2
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 👨‍💻 Author
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**Preston Zen**
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+*   🌐 **Portfolio**: [prestonzen.com](https://prestonzen.com)
+*   📧 **Contact**: [hello@prestonzen.com](mailto:hello@prestonzen.com)
+
+---
+*Built with ❤️ and ☕ by Preston Zen.*
