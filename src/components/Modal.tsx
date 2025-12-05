@@ -8,9 +8,10 @@ interface ModalProps {
     title: string;
     children: ReactNode;
     onSave: () => void;
+    onDelete?: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, onSave }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, onSave, onDelete }) => {
     if (!isOpen) return null;
 
     return (
@@ -25,7 +26,20 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, onSave 
                 <div className="modal-content">
                     {children}
                 </div>
-                <div className="modal-footer">
+                <div className="modal-footer" style={{ justifyContent: onDelete ? 'space-between' : 'flex-end', display: 'flex', gap: '12px' }}>
+                    {onDelete && (
+                        <button
+                            onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this item?')) {
+                                    onDelete();
+                                }
+                            }}
+                            className="btn btn-danger"
+                            style={{ backgroundColor: '#ff4d4f', color: 'white', border: 'none' }}
+                        >
+                            Delete
+                        </button>
+                    )}
                     <button onClick={onSave} className="btn btn-primary">Save</button>
                 </div>
             </div>

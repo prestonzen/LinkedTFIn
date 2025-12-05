@@ -1,0 +1,5 @@
+ALTER TABLE education ADD COLUMN display_order INTEGER DEFAULT 0;
+ALTER TABLE experiences ADD COLUMN display_order INTEGER DEFAULT 0;
+ALTER TABLE certifications ADD COLUMN display_order INTEGER DEFAULT 0;
+ALTER TABLE projects ADD COLUMN display_order INTEGER DEFAULT 0;
+ALTER TABLE publications ADD COLUMN display_order INTEGER DEFAULT 0;

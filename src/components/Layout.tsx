@@ -1,17 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { Home, Briefcase, MessageSquare, Bell, User, Search } from 'lucide-react';
 import './Layout.css';
 import { useAuth } from '../context/AuthContext';
+import NotificationsPopup from './NotificationsPopup';
 
 interface LayoutProps {
   children?: React.ReactNode;
 }
 
+interface ProfileData {
+  photo_url?: string;
+  headline?: string;
+  name?: string;
+}
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMeDropdownOpen, setIsMeDropdownOpen] = React.useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
   const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetch('/api/profile')
+        .then(res => res.ok ? res.json() : null)
+        .then(data => setProfile(data))
+        .catch(err => console.error("Failed to fetch profile for layout", err));
+    }
+  }, [isLoggedIn]);
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,10 +65,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <MessageSquare size={24} />
               <span>Messaging</span>
             </a>
-            <Link to="/notifications" className="nav-item">
-              <Bell size={24} />
-              <span>Notifications</span>
-            </Link>
+
+            <div className="nav-item-wrapper" style={{ position: 'relative' }}>
+              <button
+                className={`nav-item ${isNotificationsOpen ? 'active' : ''}`}
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                onBlur={() => setTimeout(() => setIsNotificationsOpen(false), 200)}
+              >
+                <Bell size={24} />
+                <span>Notifications</span>
+              </button>
+              {isNotificationsOpen && <NotificationsPopup />}
+            </div>
 
             {isLoggedIn ? (
               <div className="nav-item-wrapper" style={{ position: 'relative' }}>
@@ -58,18 +84,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   className="nav-item"
                   onClick={() => setIsMeDropdownOpen(!isMeDropdownOpen)}
                   onBlur={() => setTimeout(() => setIsMeDropdownOpen(false), 200)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                 >
-                  <User size={24} />
+                  {profile?.photo_url ? (
+                    <img src={profile.photo_url} alt="Me" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <User size={24} />
+                  )}
                   <span>Me</span>
                 </button>
                 {isMeDropdownOpen && (
                   <div className="me-dropdown">
                     <div className="me-dropdown-header">
                       <div className="me-dropdown-user">
-                        <div className="me-avatar">PZ</div>
+                        <div className="me-avatar" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {profile?.photo_url ? (
+                            <img src={profile.photo_url} alt="Me" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            "PZ"
+                          )}
+                        </div>
                         <div className="me-info">
-                          <div className="me-name">Preston Zen</div>
-                          <div className="me-headline">Software Engineer</div>
+                          <div className="me-name">{profile?.name || "Preston Zen"}</div>
+                          <div className="me-headline">{profile?.headline || "Software Engineer"}</div>
                         </div>
                       </div>
                       <Link to="/profile" className="btn btn-outline btn-sm btn-block">View Profile</Link>

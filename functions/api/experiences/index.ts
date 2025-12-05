@@ -7,7 +7,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     try {
         const { results } = await context.env.DB.prepare(
-            "SELECT * FROM experiences WHERE user_id = ? ORDER BY start_date DESC"
+            "SELECT * FROM experiences WHERE user_id = ? ORDER BY display_order ASC, start_date DESC"
         ).bind(userId).all();
 
         return new Response(JSON.stringify(results), {
@@ -29,9 +29,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const id = crypto.randomUUID();
         const now = Date.now();
 
+        // Get max display_order
+        const { maxOrder } = await context.env.DB.prepare(
+            "SELECT MAX(display_order) as maxOrder FROM experiences WHERE user_id = ?"
+        ).bind(userId).first() as { maxOrder: number };
+        const nextOrder = (maxOrder || 0) + 1;
+
         await context.env.DB.prepare(`
-            INSERT INTO experiences (id, user_id, title, company, location, start_date, end_date, description, logo_url, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO experiences (id, user_id, title, company, location, start_date, end_date, description, logo_url, display_order, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
             id,
             userId,
@@ -42,6 +48,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             data.endDate,
             data.description,
             data.logoUrl,
+            nextOrder,
             now,
             now
         ).run();

@@ -10,11 +10,17 @@ const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Login attempt', { email, password });
-        login();
-        navigate('/profile');
+        setError('');
+        const success = await login(email, password);
+        if (success) {
+            navigate('/profile');
+        } else {
+            setError('Invalid email or password');
+        }
     };
 
     return (
@@ -29,6 +35,7 @@ const Login: React.FC = () => {
                 <div className="auth-card">
                     <h1>Sign in</h1>
                     <p className="auth-subtitle">Stay updated on your professional world</p>
+                    {error && <div style={{ color: 'red', marginBottom: '16px', textAlign: 'center' }}>{error}</div>}
 
                     <form onSubmit={handleSubmit} className="auth-form">
                         <div className="form-group">

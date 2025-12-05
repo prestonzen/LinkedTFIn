@@ -1,5 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { Plus, Pencil } from 'lucide-react';
+import { Plus, Pencil, Check } from 'lucide-react';
 import './ProfileSection.css';
 
 interface ProfileSectionProps {
@@ -8,6 +8,7 @@ interface ProfileSectionProps {
     onAdd?: () => void;
     onEdit?: () => void;
     isOwnProfile?: boolean;
+    isReordering?: boolean;
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({
@@ -15,7 +16,8 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
     children,
     onAdd,
     onEdit,
-    isOwnProfile = true
+    isOwnProfile = true,
+    isReordering = false
 }) => {
     return (
         <div className="card section-card">
@@ -29,8 +31,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
                             </button>
                         )}
                         {onEdit && (
-                            <button className="icon-btn" onClick={onEdit} aria-label={`Edit ${title}`}>
-                                <Pencil size={24} />
+                            <button
+                                className={`icon-btn ${isReordering ? 'active' : ''}`}
+                                onClick={onEdit}
+                                aria-label={isReordering ? "Finish Reordering" : `Edit ${title}`}
+                                title={isReordering ? "Finish Reordering" : `Edit ${title}`}
+                            >
+                                {isReordering ? <Check size={24} /> : <Pencil size={24} />}
                             </button>
                         )}
                     </div>

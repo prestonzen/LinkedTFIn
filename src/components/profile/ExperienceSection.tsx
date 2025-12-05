@@ -2,6 +2,23 @@ import React, { useState, useEffect } from 'react';
 import ProfileSection from './ProfileSection';
 import Modal from '../Modal';
 import { fileToBase64 } from '../../utils/imageUtils';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Experience {
     id: string;
@@ -18,8 +35,52 @@ interface SectionProps {
     isOwnProfile?: boolean;
 }
 
+function SortableItem({ exp, isOwnProfile, onEdit, isReordering }: { exp: Experience, isOwnProfile: boolean, onEdit: (exp: Experience) => void, isReordering: boolean }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+    } = useSortable({ id: exp.id, disabled: !isReordering });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        cursor: isReordering ? 'grab' : 'default',
+        touchAction: 'none'
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} className="list-item">
+            {isReordering && (
+                <div {...attributes} {...listeners} style={{ marginRight: '12px', cursor: 'grab', display: 'flex', alignItems: 'center', color: '#666' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </div>
+            )}
+            <div className="item-logo">
+                {exp.logoUrl ? <img src={exp.logoUrl} alt={exp.company} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : exp.company.charAt(0)}
+            </div>
+            <div className="item-details">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <h3 className="item-title">{exp.title}</h3>
+                    {isOwnProfile && !isReordering && (
+                        <button onClick={() => onEdit(exp)} className="edit-icon-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </button>
+                    )}
+                </div>
+                <p className="item-subtitle">{exp.company}</p>
+                <p className="item-meta">{exp.startDate} - {exp.endDate} · {exp.location}</p>
+                {exp.description && <p className="item-description">{exp.description}</p>}
+            </div>
+        </div>
+    );
+}
+
 const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
     const [experiences, setExperiences] = useState<Experience[]>([]);
+    const [isReordering, setIsReordering] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Experience>({
@@ -58,6 +119,42 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
     useEffect(() => {
         fetchExperiences();
     }, []);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setExperiences((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over.id);
+                const newItems = arrayMove(items, oldIndex, newIndex);
+                return newItems;
+            });
+
+            // Calculate new order from current state for API call
+            const oldIndex = experiences.findIndex((item) => item.id === active.id);
+            const newIndex = experiences.findIndex((item) => item.id === over.id);
+            const newItems = arrayMove(experiences, oldIndex, newIndex);
+            const ids = newItems.map(item => item.id);
+
+            fetch('/api/reorder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ table: 'experiences', items: ids })
+            }).catch(err => console.error("Failed to save order", err));
+        }
+    };
 
     const handleAdd = () => {
         setEditingId(null);
@@ -121,22 +218,41 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
         }
     };
 
+    const handleDelete = async () => {
+        if (!editingId) return;
+        try {
+            await fetch(`/api/experiences/${editingId}`, { method: 'DELETE' });
+            setExperiences(experiences.filter(exp => exp.id !== editingId));
+            setIsModalOpen(false);
+            setEditingId(null);
+        } catch (error) {
+            console.error('Failed to delete experience', error);
+        }
+    };
+
     return (
         <>
-            <ProfileSection title="Experience" onAdd={handleAdd} onEdit={() => { }} isOwnProfile={isOwnProfile}>
-                {experiences.map(exp => (
-                    <div className="list-item" key={exp.id} onClick={() => isOwnProfile && handleEdit(exp)} style={{ cursor: isOwnProfile ? 'pointer' : 'default' }}>
-                        <div className="item-logo">
-                            {exp.logoUrl ? <img src={exp.logoUrl} alt={exp.company} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : exp.company.charAt(0)}
-                        </div>
-                        <div className="item-details">
-                            <h3 className="item-title">{exp.title}</h3>
-                            <p className="item-subtitle">{exp.company}</p>
-                            <p className="item-meta">{exp.startDate} - {exp.endDate} · {exp.location}</p>
-                            {exp.description && <p className="item-description">{exp.description}</p>}
-                        </div>
-                    </div>
-                ))}
+            <ProfileSection
+                title="Experience"
+                onAdd={handleAdd}
+                onEdit={() => setIsReordering(!isReordering)}
+                isOwnProfile={isOwnProfile}
+                isReordering={isReordering}
+            >
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext
+                        items={experiences.map(e => e.id)}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        {experiences.map(exp => (
+                            <SortableItem key={exp.id} exp={exp} isOwnProfile={isOwnProfile} onEdit={handleEdit} isReordering={isReordering} />
+                        ))}
+                    </SortableContext>
+                </DndContext>
             </ProfileSection>
 
             <Modal
@@ -144,6 +260,7 @@ const ExperienceSection: React.FC<SectionProps> = ({ isOwnProfile = true }) => {
                 onClose={() => setIsModalOpen(false)}
                 title={editingId ? "Edit experience" : "Add experience"}
                 onSave={handleSave}
+                onDelete={editingId ? handleDelete : undefined}
             >
                 <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
                     <div
